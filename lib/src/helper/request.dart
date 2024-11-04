@@ -33,10 +33,11 @@ class RequestConfig {
     Object? body,
     Encoding? encoding,
     int? successStatusCode,
+    Map<String, String> Function(Map<String, String> headers)? overrideHeaders,
   }) =>
       RequestConfig(
         method: method ?? this.method,
-        headers: headers ?? this.headers,
+        headers: overrideHeaders?.call(this.headers ?? {}) ?? (headers ?? this.headers),
         body: body ?? this.body,
         encoding: encoding ?? this.encoding,
         successStatusCode: successStatusCode ?? this.successStatusCode,

@@ -27,8 +27,7 @@ class TheMovieDb {
     RequestConfig newConfig = RequestConfig();
     if (_config.accessToken.isNotEmpty) {
       newConfig.headers = <String, String>{};
-      newConfig.headers![HttpHeaders.authorizationHeader] =
-          "Bearer ${_config.accessToken}";
+      newConfig.headers![HttpHeaders.authorizationHeader] = "Bearer ${_config.accessToken}";
     }
     return newConfig;
   }
@@ -40,8 +39,8 @@ class TheMovieDb {
     var response = await Request.send(
       requestUrl,
       options: _requestOptions.copy(
-        headers: {
-          if (_requestOptions.headers != null) ..._requestOptions.headers!,
+        overrideHeaders: (headers) => {
+          ...headers,
           HttpHeaders.contentTypeHeader: "application/json",
         },
       ),
@@ -67,8 +66,8 @@ class TheMovieDb {
       requestUrl,
       options: _requestOptions.copy(
         method: RequestMethod.post,
-        headers: {
-          if (_requestOptions.headers != null) ..._requestOptions.headers!,
+        overrideHeaders: (headers) => {
+          ...headers,
           HttpHeaders.contentTypeHeader: "application/json",
         },
         body: jsonEncode({
@@ -90,8 +89,7 @@ class TheMovieDb {
     String sessionId, {
     String? apiKey,
   }) async {
-    var requestUrl =
-        _requestUrl("${TMDbApi.base}/account?session_id=$sessionId", apiKey);
+    var requestUrl = _requestUrl("${TMDbApi.base}/account?session_id=$sessionId", apiKey);
     var response = await Request.send(requestUrl);
 
     if (response != null) {
@@ -118,8 +116,8 @@ class TheMovieDb {
       options: _requestOptions.copy(
         method: RequestMethod.post,
         successStatusCode: HttpStatus.created,
-        headers: {
-          if (_requestOptions.headers != null) ..._requestOptions.headers!,
+        overrideHeaders: (headers) => {
+          ...headers,
           HttpHeaders.contentTypeHeader: "application/json",
         },
         body: jsonEncode(
@@ -166,27 +164,61 @@ class TheMovieDb {
     int page = 1,
     String? apiKey,
   }) async {
-    var requestUrl = _requestUrl("${TMDbApi.base}/account/$accountId/lists?page=$page&session_id=$sessionId", apiKey);
+    var requestUrl = _requestUrl(
+        "${TMDbApi.base}/account/$accountId/lists?page=$page&session_id=$sessionId",
+        apiKey);
     var response = await Request.send(requestUrl);
 
     if (response != null) {
-      return await compute((msg) => TMDbPlaylists.fromJson(json.decode(msg)), response.data);
+      return await compute(
+          (msg) => TMDbPlaylists.fromJson(json.decode(msg)), response.data);
     }
 
     return null;
   }
 
-  static Future<TMDbPlaylist?> getPlaylist(int listId, {int page = 1, String? apiKey,}) async {
-    var requestUrl = _requestUrl("${TMDbApi.base}/list/$listId?page=$page", apiKey);
+  static Future<TMDbPlaylist?> getPlaylist(
+    int listId, {
+    int page = 1,
+    String? apiKey,
+  }) async {
+    var requestUrl =
+        _requestUrl("${TMDbApi.base}/list/$listId?page=$page", apiKey);
 
     var response = await Request.send(requestUrl);
 
     if (response != null) {
-      return await compute((msg) => TMDbPlaylist.fromJson(json.decode(msg)), response.data);
+      return await compute(
+          (msg) => TMDbPlaylist.fromJson(json.decode(msg)), response.data);
     }
 
     return null;
-
   }
 
+  static Future<bool> addToPlaylist(
+    int mediaId,
+    int listId,
+    String sessionId, {
+    String? apiKey,
+  }) async {
+    var requestUrl = _requestUrl(
+        "${TMDbApi.base}/list/$listId/add_item?session_id=$sessionId", apiKey);
+
+    var response = await Request.send(
+      requestUrl,
+      options: _requestOptions.copy(
+        method: RequestMethod.post,
+        successStatusCode: HttpStatus.created,
+        overrideHeaders: (headers) => {
+          ...headers,
+          HttpHeaders.contentTypeHeader: "application/json",
+        },
+        body: jsonEncode({
+          "media_id": mediaId,
+        }),
+      ),
+    );
+
+    return response != null && response.statusCode == HttpStatus.created;
+  }
 }

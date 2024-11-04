@@ -1,7 +1,7 @@
 name: themoviedb_dart
 description: "A TMDb Api Service."
 version: 0.0.1
-homepage:
+homepage: https://github.com/harry-odinson-369/themoviedb_dart.git
 
 environment:
   sdk: '>=3.4.3 <4.0.0'
