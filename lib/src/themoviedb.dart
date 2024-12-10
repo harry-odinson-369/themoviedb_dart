@@ -15,27 +15,40 @@ TMDbAccessConfig _config = TMDbAccessConfig(
 );
 
 class TheMovieDb {
+  static TheMovieDb? _v3;
+  static TheMovieDb get v3 {
+    _v3 ??= TheMovieDb();
+    return _v3!;
+  }
+
+  static void log(String any) {
+    debugPrint("[TheMovieDb Dart] $any");
+  }
+
   ///Set a default [apiKey] or [accessToken].
-  static void config(TMDbAccessConfig config) {
+  void config(TMDbAccessConfig config) {
     _config = config;
   }
 
-  static String _requestUrl(String url, [String? apiKey]) =>
+  String _requestUrl(String url, [String? apiKey]) =>
       "$url${url.contains("?") ? "&" : "?"}api_key=${apiKey ?? _config.apiKey}";
 
-  static RequestConfig get _requestOptions {
+  RequestConfig get _requestOptions {
     RequestConfig newConfig = RequestConfig();
     if (_config.accessToken.isNotEmpty) {
       newConfig.headers = <String, String>{};
-      newConfig.headers![HttpHeaders.authorizationHeader] = "Bearer ${_config.accessToken}";
+      newConfig.headers![HttpHeaders.authorizationHeader] =
+          "Bearer ${_config.accessToken}";
     }
     return newConfig;
   }
 
   ///Get a [request_token] from [themoviedb.org] api. once you've got the [request_token], use it to authorize the permission from user by open this page [https://themoviedb.org/authenticate/{request_token}].
-  static Future<String?> getRequestToken({String? apiKey}) async {
-    String requestUrl =
-        _requestUrl("${TMDbApi.base}/authentication/token/new", apiKey);
+  Future<String?> getRequestToken({String? apiKey}) async {
+    String requestUrl = _requestUrl(
+      "${TMDbApi.base}/authentication/token/new",
+      apiKey,
+    );
     var response = await Request.send(
       requestUrl,
       options: _requestOptions.copy(
@@ -55,12 +68,14 @@ class TheMovieDb {
   }
 
   ///Get a [session_id] from themoviedb.org api with provided [requestToken].
-  static Future<String?> getSessionId(
+  Future<String?> getSessionId(
     String requestToken, {
     String? apiKey,
   }) async {
-    var requestUrl =
-        _requestUrl("${TMDbApi.base}/authentication/session/new", apiKey);
+    var requestUrl = _requestUrl(
+      "${TMDbApi.base}/authentication/session/new",
+      apiKey,
+    );
 
     var response = await Request.send(
       requestUrl,
@@ -84,12 +99,15 @@ class TheMovieDb {
     return null;
   }
 
-  ///Get [User Account] information.
-  static Future<TMDbUserAccount?> getUserAccount(
+  ///Get [User Account] information with [session_id] get from [getSessionId] method.
+  Future<TMDbUserAccount?> getUserAccount(
     String sessionId, {
     String? apiKey,
   }) async {
-    var requestUrl = _requestUrl("${TMDbApi.base}/account?session_id=$sessionId", apiKey);
+    var requestUrl = _requestUrl(
+      "${TMDbApi.base}/account?session_id=$sessionId",
+      apiKey,
+    );
     var response = await Request.send(requestUrl);
 
     if (response != null) {
@@ -101,15 +119,17 @@ class TheMovieDb {
   }
 
   ///Create a new playlist and return [list_id];
-  static Future<int?> createPlaylist(
+  Future<int?> createPlaylist(
     String sessionId, {
     required String name,
     required String description,
     String? language,
     String? apiKey,
   }) async {
-    var requestUrl =
-        _requestUrl("${TMDbApi.base}/list?session_id=$sessionId", apiKey);
+    var requestUrl = _requestUrl(
+      "${TMDbApi.base}/list?session_id=$sessionId",
+      apiKey,
+    );
 
     var response = await Request.send(
       requestUrl,
@@ -139,13 +159,15 @@ class TheMovieDb {
   }
 
   ///Return [true] if the playlist has deleted successfully.
-  static Future<bool> deletePlaylist(
+  Future<bool> deletePlaylist(
     int listId,
     String sessionId, {
     String? apiKey,
   }) async {
     var requestUrl = _requestUrl(
-        "${TMDbApi.base}/list/$listId?session_id=$sessionId", apiKey);
+      "${TMDbApi.base}/list/$listId?session_id=$sessionId",
+      apiKey,
+    );
 
     var response = await Request.send(
       requestUrl,
@@ -158,51 +180,60 @@ class TheMovieDb {
         response.statusCode == _requestOptions.successStatusCode;
   }
 
-  static Future<TMDbPlaylists?> getAllPlaylist(
+  Future<TMDbPlaylists?> getAllPlaylist(
     int accountId,
     String sessionId, {
     int page = 1,
     String? apiKey,
   }) async {
     var requestUrl = _requestUrl(
-        "${TMDbApi.base}/account/$accountId/lists?page=$page&session_id=$sessionId",
-        apiKey);
+      "${TMDbApi.base}/account/$accountId/lists?page=$page&session_id=$sessionId",
+      apiKey,
+    );
     var response = await Request.send(requestUrl);
 
     if (response != null) {
       return await compute(
-          (msg) => TMDbPlaylists.fromJson(json.decode(msg)), response.data);
+        (msg) => TMDbPlaylists.fromJson(json.decode(msg)),
+        response.data,
+      );
     }
 
     return null;
   }
 
-  static Future<TMDbPlaylist?> getPlaylist(
+  Future<TMDbPlaylist?> getPlaylist(
     int listId, {
     int page = 1,
     String? apiKey,
   }) async {
-    var requestUrl =
-        _requestUrl("${TMDbApi.base}/list/$listId?page=$page", apiKey);
+    var requestUrl = _requestUrl(
+      "${TMDbApi.base}/list/$listId?page=$page",
+      apiKey,
+    );
 
     var response = await Request.send(requestUrl);
 
     if (response != null) {
       return await compute(
-          (msg) => TMDbPlaylist.fromJson(json.decode(msg)), response.data);
+        (msg) => TMDbPlaylist.fromJson(json.decode(msg)),
+        response.data,
+      );
     }
 
     return null;
   }
 
-  static Future<bool> addToPlaylist(
+  Future<bool> addToPlaylist(
     int mediaId,
     int listId,
     String sessionId, {
     String? apiKey,
   }) async {
     var requestUrl = _requestUrl(
-        "${TMDbApi.base}/list/$listId/add_item?session_id=$sessionId", apiKey);
+      "${TMDbApi.base}/list/$listId/add_item?session_id=$sessionId",
+      apiKey,
+    );
 
     var response = await Request.send(
       requestUrl,
