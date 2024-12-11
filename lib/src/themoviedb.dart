@@ -6,6 +6,7 @@ import 'package:themoviedb_dart/src/helper/api.dart';
 import 'package:themoviedb_dart/src/helper/request.dart';
 import 'package:themoviedb_dart/src/models/account.dart';
 import 'package:themoviedb_dart/src/models/config.dart';
+import 'package:themoviedb_dart/src/models/credential.dart';
 import 'package:themoviedb_dart/src/models/playlists.dart';
 import 'package:themoviedb_dart/src/models/playlist.dart';
 
@@ -31,7 +32,7 @@ class TheMovieDb {
   }
 
   String _requestUrl(String url, [String? apiKey]) =>
-      "$url${url.contains("?") ? "&" : "?"}api_key=${apiKey ?? _config.apiKey}";
+      "$url${apiKey != null ? "${url.contains("?") ? "&" : "?"}api_key=$apiKey" : ""}";
 
   RequestConfig get _requestOptions {
     RequestConfig newConfig = RequestConfig();
@@ -100,7 +101,7 @@ class TheMovieDb {
   }
 
   ///Get [User Account] information with [session_id] get from [getSessionId] method.
-  Future<TMDbUserAccount?> getUserAccount(
+  Future<TMDbCredentialModel?> getUserAccount(
     String sessionId, {
     String? apiKey,
   }) async {
@@ -112,7 +113,11 @@ class TheMovieDb {
 
     if (response != null) {
       var map = json.decode(response.data);
-      return TMDbUserAccount.fromJson(map);
+      var userInfo = TMDbUserAccount.fromJson(map);
+      return TMDbCredentialModel(
+        sessionId: sessionId,
+        user: userInfo,
+      );
     }
 
     return null;
