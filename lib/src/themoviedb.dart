@@ -236,6 +236,34 @@ class TheMovieDb {
     return null;
   }
 
+  Future<bool> isAdded(int mediaId, int listId, String mediaType, [String? apiKey]) async {
+    var requestUrl = _requestUrl(
+      "${TMDbApi.baseV4}/list/$listId/item_status?media_id=$mediaId&media_type=$mediaType",
+      apiKey,
+    );
+
+    var response = await Request.send(
+      requestUrl,
+      options: _requestOptions.copy(
+        method: RequestMethod.get,
+        overrideHeaders: (headers) => {
+          ...headers,
+          HttpHeaders.contentTypeHeader: "application/json",
+        },
+      ),
+    );
+
+    if (response != null) {
+      var map = json.decode(response.data);
+      var isSuccess = map["success"] ?? false;
+      var id = map["media_id"] ?? 0;
+      var type = map["media_type"] ?? "";
+      return isSuccess == true && id == mediaId && type == mediaType;
+    } else {
+      return false;
+    }
+  }
+
   Future<bool> addToPlaylist(
     int mediaId,
     int listId,
