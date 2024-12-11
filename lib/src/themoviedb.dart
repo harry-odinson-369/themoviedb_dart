@@ -31,8 +31,15 @@ class TheMovieDb {
     _config = config;
   }
 
-  String _requestUrl(String url, [String? apiKey]) =>
-      "$url${apiKey != null ? "${url.contains("?") ? "&" : "?"}api_key=$apiKey" : ""}";
+  String _requestUrl(String url, [String? apiKey]) {
+    if (apiKey != null) {
+      return "$url${url.contains("?") ? "&" : "?"}api_key=$apiKey";
+    } else if (_config.apiKey.isNotEmpty) {
+      return "$url${url.contains("?") ? "&" : "?"}api_key=${_config.apiKey}";
+    } else {
+      return url;
+    }
+  }
 
   RequestConfig get _requestOptions {
     RequestConfig newConfig = RequestConfig();
