@@ -172,7 +172,8 @@ class TheMovieDb {
   ///Get [User Account] information with [session_id] get from [getSessionId] method.
   Future<TMDbCredentialModel?> getUserAccount(
     String sessionId,
-    String accessToken, {
+    String accessToken,
+    String accountId, {
     String? apiKey,
   }) async {
     var requestUrl = _requestUrl(
@@ -187,6 +188,7 @@ class TheMovieDb {
       return TMDbCredentialModel(
         sessionId: sessionId,
         accessToken: accessToken,
+        accountId: accountId,
         user: userInfo,
       );
     }
