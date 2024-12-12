@@ -33,7 +33,9 @@ class TheMovieDb {
   }
 
   String _requestUrl(String url, [String? apiKey]) {
-    if (apiKey != null) {
+    if (apiKey == "") {
+      return url;
+    } else if (apiKey != null) {
       return "$url${url.contains("?") ? "&" : "?"}api_key=$apiKey";
     } else if (_config.apiKey.isNotEmpty) {
       return "$url${url.contains("?") ? "&" : "?"}api_key=${_config.apiKey}";
