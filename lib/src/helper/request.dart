@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:http/http.dart' as http;
 import 'package:base32/base32.dart';
@@ -148,16 +149,16 @@ class Request {
 
       var response = await future;
 
-      if (response.statusCode == config.successStatusCode) {
-        var httpResponse = RequestResponse(
-          data: response.body,
-          expire: null,
-          statusCode: response.statusCode,
-        );
-        return httpResponse;
-      }
+      var httpResponse = RequestResponse(
+        data: response.body,
+        expire: null,
+        statusCode: response.statusCode,
+      );
 
-      throw "[TMDb] Failed to request ${uri.toString()}\nstatus: ${response.statusCode}\nheaders: ${response.request?.headers}\nencoding: ${config.encoding}\nbody: ${config.body.toString()}\nresponse_body: ${response.body}";
+      if (response.statusCode != config.successStatusCode) {
+        log("[TMDb] Failed to request ${uri.toString()}\nstatus: ${response.statusCode}\nheaders: ${response.request?.headers}\nencoding: ${config.encoding}\nbody: ${config.body.toString()}\nresponse_body: ${response.body}");
+      }
+      return httpResponse;
     } catch (err) {
       rethrow;
     }
