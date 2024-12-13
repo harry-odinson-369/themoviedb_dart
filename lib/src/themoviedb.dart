@@ -510,4 +510,38 @@ class TheMovieDb {
 
     return response != null && response.statusCode == 201;
   }
+
+  Future<List<TMDbMovieModel>> getRecommendations(
+    String accountObjectId,
+    String accessToken,
+    String mediaType,
+  ) async {
+    var requestUrl = _requestUrl(
+      "${TMDbApi.base}/account/$accountObjectId/$mediaType/recommendations",
+    );
+
+    var response = await Request.send(requestUrl, options: _requestOptions.copy(
+      overrideHeaders: (headers) {
+        var cloned = {...headers};
+        cloned[HttpHeaders.authorizationHeader] = "Bearer $accessToken";
+        return {
+          ...cloned,
+          HttpHeaders.contentTypeHeader: "application/json",
+        };
+      },
+    ));
+
+    if (response != null &&
+        response.statusCode == _requestOptions.successStatusCode) {
+      return await compute(
+          (msg) => List<TMDbMovieModel>.from(
+                json.decode(msg)["results"].map(
+                      (e) => TMDbMovieModel.fromJson(e),
+                    ),
+              ),
+          response.data);
+    } else {
+      return [];
+    }
+  }
 }
