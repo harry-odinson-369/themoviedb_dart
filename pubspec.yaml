@@ -13,6 +13,10 @@ dependencies:
     sdk: flutter
   http: ^1.2.2
   shared_preferences: ^2.3.2
+  flutter_secure_storage: ^9.2.4
+  webview_flutter: ^4.13.0
+  webview_flutter_wkwebview: ^3.18.2
+  webview_flutter_android: ^4.3.2
 
 dev_dependencies:
   flutter_test:

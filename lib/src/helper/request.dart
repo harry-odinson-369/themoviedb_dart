@@ -38,7 +38,8 @@ class RequestConfig {
   }) =>
       RequestConfig(
         method: method ?? this.method,
-        headers: overrideHeaders?.call(this.headers ?? {}) ?? (headers ?? this.headers),
+        headers: overrideHeaders?.call({...(this.headers ?? {})}) ??
+            (headers ?? this.headers),
         body: body ?? this.body,
         encoding: encoding ?? this.encoding,
         successStatusCode: successStatusCode ?? this.successStatusCode,
@@ -139,11 +140,6 @@ class Request {
             headers: config.headers,
             body: config.body,
             encoding: config.encoding,
-          );
-        default:
-          future = http.get(
-            uri,
-            headers: config.headers,
           );
       }
 
