@@ -37,7 +37,7 @@ class _WebViewSheetState extends State<WebViewSheet> {
 
   String url = "";
 
-  double progress = 0;
+  int progress = 0;
 
   bool isSuccess = false;
 
@@ -68,6 +68,7 @@ class _WebViewSheetState extends State<WebViewSheet> {
       ..setNavigationDelegate(NavigationDelegate(
         onNavigationRequest: onUrlRequest,
         onUrlChange: onUrlChanged,
+        onProgress: (progress) => setState(() => this.progress = progress),
       ))
       ..loadRequest(Uri.parse(widget.url));
     url = widget.url;
